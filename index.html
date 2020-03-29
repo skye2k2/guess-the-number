@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Guess The Number</title>
+
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        width: 100%;
+      }
+
+      [hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Guess a number between <span data-test="lower-bound"></span> and <span data-test="upper-bound"></span></h2>
+
+    <form data-test="form" onsubmit="return guess(this)">
+      <input type="text" pattern="\d*" maxlength="3" data-test="guess"><input type="submit" value="Guess">
+    </form>
+
+    <div data-test="winner-data" hidden>
+      <h2>You win! The number was: <span data-test="secret-number"></span></h2>
+      <p>Number of guesses: <span data-test="guess-count"></span></p>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+      let guessCount;
+      let secretNumber;
+      let lowerBound;
+      let upperBound;
+
+      let lowerBoundField = document.querySelector('[data-test="lower-bound"]');
+      let upperBoundField = document.querySelector('[data-test="upper-bound"]');
+      let guessField = document.querySelector('[data-test="guess"]');
+      let secretField = document.querySelector('[data-test="secret-number"]');
+      let guessCountField = document.querySelector('[data-test="guess-count"]');
+      let winnerData = document.querySelector('[data-test="winner-data"]');
+
+      function update (guess) {
+        guessField.focus();
+        chooseANumber(guess);
+      }
+
+      function chooseANumber (choice) {
+        if (choice === true) {
+          guessCount = 0;
+          lowerBound = 0;
+          upperBound = 100;
+          secretNumber = Math.floor(Math.random() * 100);
+          secretField.innerHTML = secretNumber;
+          console.log(secretNumber);
+        } else if (choice < secretNumber && choice > lowerBound) {
+          lowerBound = choice;
+        } else if (choice > secretNumber && choice < upperBound) {
+          upperBound = choice;
+        }
+
+        lowerBoundField.innerHTML = lowerBound;
+        upperBoundField.innerHTML = upperBound;
+      }
+
+      function guess (form) {
+        guessCount++;
+        guessCountField.innerHTML = guessCount;
+        let guess = parseInt(guessField.value);
+        guessField.value = "";
+
+        if (guess === secretNumber) {
+          winnerData.removeAttribute("hidden");
+          setTimeout(() => {
+            winnerData.setAttribute("hidden", true);
+            // confetti();
+            update(true);
+          }, 4000);
+        } else {
+          update(guess);
+        }
+
+        return false; // Keep from refreshing the page on submit
+      }
+
+      // Initialize
+      window.onload = (evt) => {
+        update(true);
+      }
+
+      // We really only want to focus on the text input
+      document.querySelector("body").addEventListener('click', (evt) => {
+        if (evt.target.localName === "body") {
+          guessField.focus();
+        }
+      });
+    </script>
+
+    <!-- <script src="confetti.js"></script> -->
+  </body>
+</html>
